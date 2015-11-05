@@ -1,4 +1,4 @@
-package com.xydroid.dbutils.repostory;
+package com.xydroid.dbutils.persistence.repository;
 
 import java.io.Serializable;
 
