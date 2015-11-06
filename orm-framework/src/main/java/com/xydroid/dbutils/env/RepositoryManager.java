@@ -1,48 +1,43 @@
 package com.xydroid.dbutils.env;
 
-import com.xydroid.dbutils.persistence.SqliteEnv;
-import com.xydroid.dbutils.persistence.helper.DatabaseHelper;
+import android.database.sqlite.SQLiteOpenHelper;
+
+import com.xydroid.dbutils.SQLiteContext;
+import com.xydroid.dbutils.env.helper.SQLiteDatabaseContext;
+import com.xydroid.dbutils.env.helper.SQLiteDatabaseHelper;
+import com.xydroid.dbutils.persistence.SQLiteEnv;
 import com.xydroid.dbutils.persistence.proxy.Proxy;
 import com.xydroid.dbutils.persistence.repository.Repository;
-
 import java.util.HashMap;
 import java.util.Map;
 
 public class RepositoryManager {
-    private static HashMap<String, DatabaseHelper> dbMap = new HashMap<String, DatabaseHelper>();
-    private static RepositoryManager Instance = new RepositoryManager();
-    private Map<String, Map<Class, Repository>> repositoryMap = new HashMap<>();
+    private SQLiteContext mSQLiteContext;
+    private SQLiteOpenHelper mSQLiteOpenHelper;
+    private Map<Class, Repository> repositoryMap = new HashMap<>();
 
-    public static RepositoryManager getInstance() {
-        return Instance;
+    public RepositoryManager(SQLiteContext sqliteContext) {
+        mSQLiteContext = sqliteContext;
+        initSQLiteOpenHelper();
     }
 
-    private RepositoryManager() {
+    private void initSQLiteOpenHelper() {
+        SQLiteEnv env = mSQLiteContext.getSQLiteEnv();
+        SQLiteDatabaseContext sqliteDatabaseContext = new SQLiteDatabaseContext(mSQLiteContext);
+        mSQLiteOpenHelper = new SQLiteDatabaseHelper(sqliteDatabaseContext, env.getDbName(), env.getVersion());
     }
 
-    public Repository getRepostory(SqliteEnv env, Class<? extends Repository> clazz) {
-        String envKey = env.toString();
-        Map<Class, Repository> envRepository = repositoryMap.get(envKey);
-        if (null == envRepository) {
-            envRepository = new HashMap<Class, Repository>();
-            repositoryMap.put(envKey, envRepository);
+    public Repository getRepostory(Class<? extends Repository> clazz) {
+        if (repositoryMap.containsKey(clazz)){
+            return repositoryMap.get(clazz);
         }
-
-        Repository repository = envRepository.get(clazz);
-        if (null == repository) {
-            repository = (Repository)initRepostoryProxy(clazz);
-            envRepository.put(clazz, repository);
-            repositoryMap.put(envKey, envRepository);
-        }
+        Repository repository = initRepostoryProxy(clazz);
+        repositoryMap.put(clazz,repository);
         return repository;
     }
 
-    public void remove(SqliteEnv env) {
-        repositoryMap.remove(env.toString());
-    }
-
-    private Object initRepostoryProxy(Class<? extends Repository> clazz) {
-        return java.lang.reflect.Proxy.newProxyInstance(clazz.getClassLoader(), new Class[]{clazz},
-                new Proxy(clazz));
+    private Repository initRepostoryProxy(Class<? extends Repository> clazz) {
+        return (Repository)java.lang.reflect.Proxy.newProxyInstance(clazz.getClassLoader(), new Class[]{clazz},
+                new Proxy(mSQLiteOpenHelper, clazz));
     }
 }

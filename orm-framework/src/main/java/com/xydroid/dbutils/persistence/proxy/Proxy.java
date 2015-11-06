@@ -1,5 +1,7 @@
 package com.xydroid.dbutils.persistence.proxy;
 
+import android.database.sqlite.SQLiteOpenHelper;
+
 import com.xydroid.dbutils.persistence.repository.Repository;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -12,12 +14,18 @@ import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 
 public class Proxy implements Repository, InvocationHandler {
-    private static Proxy instance= null;
     private Class targetClazz;
+    private SQLiteOpenHelper mSQLiteOpenHelper;
 
-    /** 私有构造器 */
-    public Proxy(Class clazz) {
+    private Class entity;
+
+    public Proxy(SQLiteOpenHelper helper, Class clazz) {
+        mSQLiteOpenHelper = helper;
         targetClazz = clazz;
+    }
+
+    private void init(){
+
     }
 
     @Override

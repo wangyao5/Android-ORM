@@ -1,9 +1,8 @@
 package wy.android_orm;
 
 import android.app.Application;
-import com.xydroid.dbutils.AppSqliteConfiguration;
-import com.xydroid.dbutils.persistence.repository.Repository;
-import com.xydroid.dbutils.test.TestRepository;
+import wy.android_orm.test.TestRepository;
+
 
 public class MyApplication extends Application {
 

@@ -1,4 +1,4 @@
-package com.xydroid.dbutils.test;
+package wy.android_orm.test;
 
 import com.xydroid.dbutils.persistence.annotation.Entity;
 import com.xydroid.dbutils.persistence.annotation.Id;

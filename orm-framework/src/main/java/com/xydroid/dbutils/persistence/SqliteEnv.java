@@ -1,24 +1,25 @@
 package com.xydroid.dbutils.persistence;
 
-import android.content.Context;
 import com.xydroid.dbutils.Configurable;
 import com.xydroid.dbutils.persistence.repository.Repository;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
-public class SqliteEnv {
+public class SQLiteEnv {
     private boolean external;
     private String dbPath;
     private String dbName;
     private int version;
-    private Context context;
-    private Class<? extends Repository>[] repostorys;
+    private Set<Class<? extends Repository>> repositorys;
 
-    public SqliteEnv(Context context, Configurable config){
-        this.context = context;
+    public SQLiteEnv(Configurable config) {
         external = config.external();
         dbPath = config.dbPath();
         dbName = config.dbName();
         version = config.version();
-        repostorys = config.repository();
+        repositorys = new HashSet<>();
+        repositorys.addAll(Arrays.asList(config.repository()));
     }
 
     public boolean isExternal() {
@@ -53,39 +54,31 @@ public class SqliteEnv {
         this.version = version;
     }
 
-    public Context getContext() {
-        return context;
+    public Set<Class<? extends Repository>> getRepositorys() {
+        return repositorys;
     }
 
-    public void setContext(Context context) {
-        this.context = context;
-    }
-
-    public Class<? extends Repository>[] getRepostorys() {
-        return repostorys;
-    }
-
-    public void setRepostorys(Class<? extends Repository>[] repostorys) {
-        this.repostorys = repostorys;
+    public void setRepositorys(Set<Class<? extends Repository>> repositorys) {
+        this.repositorys = repositorys;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof SqliteEnv){
-            SqliteEnv config = (SqliteEnv)obj;
-            if (this.external != config.external){
+        if (obj instanceof SQLiteEnv) {
+            SQLiteEnv config = (SQLiteEnv) obj;
+            if (this.external != config.external) {
                 return false;
             }
 
-            if (!this.dbPath.equals(config.dbPath)){
+            if (!this.dbPath.equals(config.dbPath)) {
                 return false;
             }
 
-            if (!this.dbName.equals(config.dbName)){
+            if (!this.dbName.equals(config.dbName)) {
                 return false;
             }
 
-            if (this.version != config.version){
+            if (this.version != config.version) {
                 return false;
             }
         }
@@ -94,6 +87,19 @@ public class SqliteEnv {
 
     @Override
     public String toString() {
-        return external+dbPath+dbName;
+        return external + dbPath + dbName;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result
+                + ((external) ? 0 : 1);
+        result = prime * result
+                + ((dbPath == null) ? 0 : dbPath.hashCode());
+        result = prime * result
+                + ((dbName == null) ? 0 : dbName.hashCode());
+        return result;
     }
 }

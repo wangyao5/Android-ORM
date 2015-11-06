@@ -1,34 +1,48 @@
 package com.xydroid.dbutils;
 
 import android.content.Context;
-
 import com.xydroid.dbutils.env.RepositoryManager;
-import com.xydroid.dbutils.persistence.SqliteEnv;
+import com.xydroid.dbutils.persistence.SQLiteEnv;
 import com.xydroid.dbutils.persistence.repository.Repository;
 import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.Map;
 
-public class SqliteContext {
-    private SqliteEnv mSqliteEnv;
-    private Map<Class, Repository> repositoryMap = new HashMap<>();
-    public SqliteContext(Context context){
+public class SQLiteContext {
+    private SQLiteEnv mSQLiteEnv;
+    private Context mContext;
+    private RepositoryManager mRepositoryManager;
+    public SQLiteContext(Context context){
+        mContext = context;
         Annotation[] annotations = this.getClass().getAnnotations();
         for (Annotation annotation : annotations){
             if (annotation instanceof Configurable){
                 Configurable config = (Configurable) annotation;
-                mSqliteEnv = new SqliteEnv(context, config);
+                mSQLiteEnv = new SQLiteEnv(config);
                 break;
             }
         }
+        initRepositoryManager();
     }
 
-    public Repository getRepository(Class clazz){
-        return RepositoryManager.getInstance().getRepostory(mSqliteEnv, clazz);
+    public Repository getRepository(Class<? extends Repository> clazz){
+        if (!containsRepository(clazz)){
+            throw new IllegalArgumentException("SQLiteContext not have Repository named : " + clazz.getName());
+        }
+        return mRepositoryManager.getRepostory(clazz);
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        RepositoryManager.getInstance().remove(mSqliteEnv);
+    private void initRepositoryManager(){
+        mRepositoryManager = new RepositoryManager(this);
+    }
+
+    private boolean containsRepository(Class<? extends Repository> clazz){
+        return mSQLiteEnv.getRepositorys().contains(clazz);
+    }
+
+    public SQLiteEnv getSQLiteEnv() {
+        return mSQLiteEnv;
+    }
+
+    public Context getContext() {
+        return mContext;
     }
 }
