@@ -9,7 +9,7 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        AppSqliteConfiguration configuration = new AppSqliteConfiguration(this);
+        AppSQLiteConfiguration configuration = new AppSQLiteConfiguration(this);
         TestRepository testRepository = (TestRepository)configuration.getRepository(TestRepository.class);
 //        testRepository.call("xxx","yy");
         testRepository.count();

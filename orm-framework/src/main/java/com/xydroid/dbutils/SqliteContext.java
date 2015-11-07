@@ -23,15 +23,15 @@ public class SQLiteContext {
         initRepositoryManager();
     }
 
+    private void initRepositoryManager(){
+        mRepositoryManager = new RepositoryManager(this);
+    }
+
     public Repository getRepository(Class<? extends Repository> clazz){
         if (!containsRepository(clazz)){
             throw new IllegalArgumentException("SQLiteContext not have Repository named : " + clazz.getName());
         }
         return mRepositoryManager.getRepostory(clazz);
-    }
-
-    private void initRepositoryManager(){
-        mRepositoryManager = new RepositoryManager(this);
     }
 
     private boolean containsRepository(Class<? extends Repository> clazz){

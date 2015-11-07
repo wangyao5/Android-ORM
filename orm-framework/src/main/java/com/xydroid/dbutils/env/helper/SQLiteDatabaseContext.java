@@ -29,16 +29,16 @@ public class SQLiteDatabaseContext extends ContextWrapper {
     @Override
     public File getDatabasePath(String name) {
         String dbPath;
-        if (mSqliteContext.getSqliteEnv().isExternal()) {
+        if (mSqliteContext.getSQLiteEnv().isExternal()) {
             boolean sdExist = android.os.Environment.MEDIA_MOUNTED.equals(android.os.Environment.getExternalStorageState());
             if (!sdExist) {
-                dbPath = mContext.getFilesDir().getAbsolutePath() + File.separatorChar + mSqliteContext.getSqliteEnv().getDbPath();
+                dbPath = mContext.getFilesDir().getAbsolutePath() + File.separatorChar + mSqliteContext.getSQLiteEnv().getDbPath();
             } else {
                 dbPath = android.os.Environment.getExternalStorageDirectory().toString() +
-                        File.separatorChar + mSqliteContext.getSqliteEnv().getDbPath();
+                        File.separatorChar + mSqliteContext.getSQLiteEnv().getDbPath();
             }
         } else {
-            dbPath = mContext.getFilesDir().getAbsolutePath() + File.separatorChar + mSqliteContext.getSqliteEnv().getDbPath();
+            dbPath = mContext.getFilesDir().getAbsolutePath() + File.separatorChar + mSqliteContext.getSQLiteEnv().getDbPath();
         }
 
         File pathFile = new File(dbPath);
@@ -92,7 +92,7 @@ public class SQLiteDatabaseContext extends ContextWrapper {
             return SQLiteDatabase.openOrCreateDatabase(getDatabasePath(name), null);
         }
 
-        return SQLiteDatabase.openOrCreateDatabase(mContext.getDatabasePath(mSqliteContext.getSqliteEnv().getDbPath()
-                + File.separatorChar + mSqliteContext.getSqliteEnv().getDbName()), null);
+        return SQLiteDatabase.openOrCreateDatabase(mContext.getDatabasePath(mSqliteContext.getSQLiteEnv().getDbPath()
+                + File.separatorChar + mSqliteContext.getSQLiteEnv().getDbName()), null);
     }
 }

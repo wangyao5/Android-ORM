@@ -4,11 +4,11 @@ import android.content.Context;
 
 import com.xydroid.dbutils.Configurable;
 import com.xydroid.dbutils.SQLiteContext;
-import com.xydroid.dbutils.test.TestRepository;
+import wy.android_orm.test.TestRepository;
 
 @Configurable(external = true, dbPath = "com.wy.test", dbName = "test.db", repository = {TestRepository.class})
-public class AppSqliteConfiguration extends SQLiteContext {
-    public AppSqliteConfiguration(Context context) {
+public class AppSQLiteConfiguration extends SQLiteContext {
+    public AppSQLiteConfiguration(Context context) {
         super(context);
     }
 }
