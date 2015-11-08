@@ -1,5 +1,7 @@
 package com.xydroid.dbutils.persistence.repository;
 
+import com.xydroid.dbutils.persistence.sqlite.query.CursorIterable;
+
 import java.io.Serializable;
 
 public interface CrudRepository<T, ID extends Serializable> extends Repository<T, ID> {
@@ -11,7 +13,7 @@ public interface CrudRepository<T, ID extends Serializable> extends Repository<T
      * @param entity
      * @return the saved entity
      */
-    T save(T entity);
+    void save(T entity);
 
 
     /**
@@ -20,7 +22,7 @@ public interface CrudRepository<T, ID extends Serializable> extends Repository<T
      * @param entities
      * @return
      */
-    Iterable<T> save(Iterable<? extends T> entities);
+    void save(Iterable<? extends T> entities);
 
 
     /**
@@ -49,7 +51,7 @@ public interface CrudRepository<T, ID extends Serializable> extends Repository<T
      *
      * @return all entities
      */
-    Iterable<T> findAll();
+    CursorIterable<T> findAll();
 
 
     /**

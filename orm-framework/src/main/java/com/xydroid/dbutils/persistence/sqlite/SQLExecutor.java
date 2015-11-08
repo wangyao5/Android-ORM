@@ -6,8 +6,6 @@ import java.lang.reflect.Field;
 
 public class SQLExecutor {
     private SQLiteOpenHelper mSQLiteOpenHelper;
-    private Class mEntityClazz;
-    private Class mIdClazz;
     private Entity mEntity;
     public SQLExecutor(SQLiteOpenHelper helper, Class entityClazz, Class idClazz){
         mSQLiteOpenHelper = helper;
@@ -15,18 +13,10 @@ public class SQLExecutor {
     }
 
     private void init(Class entityClazz, Class idClazz){
-        Field[] fields = mEntityClazz.getDeclaredFields();
-        mEntityClazz.getAnnotations();
-        for (Field field : fields){
-            Annotation[] annotations = field.getDeclaredAnnotations();
-            for (Annotation annotation : annotations){
-
-            }
-        }
+        mEntity = new Entity(entityClazz, idClazz);
     }
 
     public void createTable(){
 
     }
-
 }
