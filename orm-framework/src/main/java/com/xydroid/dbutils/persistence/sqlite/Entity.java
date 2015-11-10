@@ -1,70 +1,49 @@
 package com.xydroid.dbutils.persistence.sqlite;
 
-import com.xydroid.dbutils.persistence.annotation.AutoIncrement;
-import com.xydroid.dbutils.persistence.annotation.Check;
-import com.xydroid.dbutils.persistence.annotation.Column;
-import com.xydroid.dbutils.persistence.annotation.Foreign;
-import com.xydroid.dbutils.persistence.annotation.Id;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Entity {
-    private Annotation mEntityAnnotation;
-    private Map<Field, Annotation[]> mFieldsAnnotations = new HashMap<>();
-    private Class mIdClazz;
+    private String mTableName;
+    private Annotation[] mEntityAnnotation;
+    private List<TableField> mTableFields = new ArrayList<>();
 
     public Entity(Class entityClazz, Class idClazz) {
-        mIdClazz = idClazz;
-        mEntityAnnotation = getEntityUsedAnnotation(entityClazz);
-        initField(entityClazz);
+        mEntityAnnotation = findEntityUsedAnnotation(entityClazz);
+        initTableName();
+        initTableFields(entityClazz);
     }
 
-    public Entity(Annotation mEntityAnnotations, Map<Field, Annotation[]> mFieldsAnnotations) {
-        this.mEntityAnnotation = mEntityAnnotations;
-        this.mFieldsAnnotations = mFieldsAnnotations;
+    private void initTableName(){
+        for (Annotation tableAnnotation : mEntityAnnotation) {
+            if (tableAnnotation instanceof com.xydroid.dbutils.persistence.annotation.Entity) {
+                mTableName = ((com.xydroid.dbutils.persistence.annotation.Entity) tableAnnotation).name();
+                break;
+            }
+        }
+        if (mTableName == null) {
+            throw new IllegalArgumentException("Entity must contains name!");
+        }
     }
-
-    private void initField(Class entityClazz) {
+    private void initTableFields(Class entityClazz) {
         Field[] fields = entityClazz.getDeclaredFields();
         for (Field field : fields) {
-            mFieldsAnnotations.put(field, getFieldUsedAnnotations(field));
+            mTableFields.add(new TableField(field));
         }
     }
 
-    private Annotation getEntityUsedAnnotation(Class entityClazz) {
+    public Annotation[] getEntityAnnotation() {
+        return mEntityAnnotation;
+    }
+
+    private Annotation[] findEntityUsedAnnotation(Class entityClazz) {
+        List<Annotation> tmpAnnotation = new ArrayList<>();
         Annotation entityAnnotation = null;
         if (entityClazz.isAnnotationPresent(com.xydroid.dbutils.persistence.annotation.Entity.class)) {
             entityAnnotation = entityClazz.getAnnotation(com.xydroid.dbutils.persistence.annotation.Entity.class);
-        }
-        return entityAnnotation;
-    }
-
-    private Annotation[] getFieldUsedAnnotations(Field field) {
-        List<Annotation> tmpAnnotation = new ArrayList<>();
-
-        if (field.isAnnotationPresent(AutoIncrement.class)) {
-            tmpAnnotation.add(field.getAnnotation(AutoIncrement.class));
-        }
-
-        if (field.isAnnotationPresent(Check.class)) {
-            tmpAnnotation.add(field.getAnnotation(Check.class));
-        }
-
-        if (field.isAnnotationPresent(Column.class)) {
-            tmpAnnotation.add(field.getAnnotation(Column.class));
-        }
-
-        if (field.isAnnotationPresent(Foreign.class)) {
-            tmpAnnotation.add(field.getAnnotation(Foreign.class));
-        }
-
-        if (field.isAnnotationPresent(Id.class)) {
-            tmpAnnotation.add(field.getAnnotation(Id.class));
+            tmpAnnotation.add(entityAnnotation);
         }
 
         Annotation[] retAnnotation = new Annotation[tmpAnnotation.size()];
@@ -72,4 +51,14 @@ public class Entity {
         return retAnnotation;
     }
 
+    public String createTableSql(){
+        String sqlTmplate = "CREATE TABLE IF NOT EXISTS %s ( %s )";
+
+        StringBuilder sb = new StringBuilder();
+        for (int i =0; i < mTableFields.size() - 1 ; i++){
+            sb.append(mTableFields.get(i).toCreateFieldString()).append(",");
+        }
+        sb.append(mTableFields.get(mTableFields.size() - 1).toCreateFieldString());
+        return String.format(sqlTmplate, mTableName, sb.toString());
+    }
 }

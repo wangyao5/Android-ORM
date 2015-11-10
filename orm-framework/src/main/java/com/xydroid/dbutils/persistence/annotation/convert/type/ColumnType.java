@@ -1,4 +1,4 @@
-package com.xydroid.dbutils.persistence.annotation.type;
+package com.xydroid.dbutils.persistence.annotation.convert.type;
 
 public enum ColumnType {
     INTEGER("INTEGER"), REAL("REAL"), TEXT("TEXT"), BLOB("BLOB");

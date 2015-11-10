@@ -26,12 +26,14 @@ public class Proxy implements Repository, InvocationHandler {
         Class entityClass = (Class)typeArgs[0];
         Class idClass = (Class)typeArgs[1];
         mExec = new SQLExecutor(helper, entityClass, idClass);
+        mExec.createTable();
     }
 
     @Override
     public Object invoke(Object target, Method targetMethod, Object[] params)
             throws Throwable {
         Class methodClass = targetMethod.getDeclaringClass();
+        mExec.save(params[0]);
         Type[] gen = methodClass.getGenericInterfaces();
         for (Type type:gen){
             Class clazza = type.getClass();

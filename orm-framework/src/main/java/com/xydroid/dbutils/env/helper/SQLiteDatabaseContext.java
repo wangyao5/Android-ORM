@@ -54,6 +54,7 @@ public class SQLiteDatabaseContext extends ContextWrapper {
             }
         } else
             isFileCreateSuccess = true;
+
         if (isFileCreateSuccess)
             return dbFile;
         else
@@ -88,11 +89,7 @@ public class SQLiteDatabaseContext extends ContextWrapper {
     @Override
     public SQLiteDatabase openOrCreateDatabase(String name, int mode, SQLiteDatabase.CursorFactory factory,
                                                DatabaseErrorHandler errorHandler) {
-        if (null != getDatabasePath(name)) {
-            return SQLiteDatabase.openOrCreateDatabase(getDatabasePath(name), null);
-        }
-
-        return SQLiteDatabase.openOrCreateDatabase(mContext.getDatabasePath(mSqliteContext.getSQLiteEnv().getDbPath()
-                + File.separatorChar + mSqliteContext.getSQLiteEnv().getDbName()), null);
+        SQLiteDatabase result = SQLiteDatabase.openOrCreateDatabase(getDatabasePath(name), null);
+        return result;
     }
 }

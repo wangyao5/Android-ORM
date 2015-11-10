@@ -9,6 +9,7 @@ jar {
         attributes 'Manifest-Version': version, 'Implementation-Title': 'Gradle Quickstart', 'Implementation-Version': version
     }
 }
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 //    compile 'org.springframework.data:spring-data-jpa:1.0.0.RELEASE'

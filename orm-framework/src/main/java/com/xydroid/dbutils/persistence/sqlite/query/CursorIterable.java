@@ -15,6 +15,7 @@ public class CursorIterable<T> implements Iterable<T>{
             throw new IllegalArgumentException("Cursor equal Null occur！");
         }
         mCursor = cursor;
+        mCursor.moveToFirst();
     }
 
     @Override
