@@ -7,6 +7,7 @@ import com.xydroid.dbutils.persistence.annotation.Foreign;
 import com.xydroid.dbutils.persistence.annotation.Id;
 import com.xydroid.dbutils.persistence.annotation.convert.ColumnConvertFactory;
 import com.xydroid.dbutils.persistence.annotation.convert.ColumnConverter;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -24,20 +25,20 @@ public class TableField {
     private Class mFieldType;
     private ColumnConverter mFieldConverter;
 
-    public TableField(Field field){
+    public TableField(Field field) {
         Annotation[] fieldAnnotations = findFieldUsedAnnotations(field);
         mFieldType = field.getType();
         mFieldConverter = ColumnConvertFactory.getFieldConverter(field);
-        for (Annotation annotation : fieldAnnotations){
-            if(annotation instanceof Id){
+        for (Annotation annotation : fieldAnnotations) {
+            if (annotation instanceof Id) {
                 isId = true;
             }
 
-            if(annotation instanceof AutoIncrement){
+            if (annotation instanceof AutoIncrement) {
                 autoIncrement = true;
             }
 
-            if (annotation instanceof Column){
+            if (annotation instanceof Column) {
                 Column columnAnnotation = (Column) annotation;
                 columnName = columnAnnotation.name();
                 unique = columnAnnotation.unique();
@@ -46,7 +47,7 @@ public class TableField {
                 updatable = columnAnnotation.updatable();
             }
 
-            if (annotation instanceof Check){
+            if (annotation instanceof Check) {
                 Check checkAnnotation = (Check) annotation;
                 checkValue = checkAnnotation.check();
             }
@@ -81,8 +82,8 @@ public class TableField {
         return retAnnotation;
     }
 
-    public String toCreateFieldString(){
-        if (null == columnName || "".equals(columnName)){
+    public String toCreateFieldString() {
+        if (null == columnName || "".equals(columnName)) {
             throw new IllegalArgumentException("Column name is empty!");
         }
         StringBuilder sb = new StringBuilder();
@@ -90,24 +91,32 @@ public class TableField {
         sb.append(columnName);
         sb.append("\" ");
         sb.append(mFieldConverter.getColumnType());
-        if (isId){
+        if (isId) {
             sb.append(" PRIMARY KEY");
         }
-        if (autoIncrement){
+        if (autoIncrement) {
             sb.append(" AUTOINCREMENT");
         }
-        if (unique){
+        if (unique) {
             sb.append(" UNIQUE");
         }
-        if (!nullable){
+        if (!nullable) {
             sb.append(" NOT NULL");
         }
         boolean check = null == checkValue || "".equals(checkValue);
-        if (!check){
+        if (!check) {
             sb.append("CHECK(");
             sb.append(checkValue);
             sb.append(")");
         }
         return sb.toString();
+    }
+
+    public boolean isIdColumn() {
+        return isId;
+    }
+
+    public String getColumnName() {
+        return columnName;
     }
 }

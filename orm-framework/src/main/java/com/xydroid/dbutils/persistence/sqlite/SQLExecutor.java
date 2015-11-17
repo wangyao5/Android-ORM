@@ -1,81 +1,52 @@
 package com.xydroid.dbutils.persistence.sqlite;
 
+import android.content.ContentValues;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.xydroid.dbutils.persistence.repository.CrudRepository;
-import com.xydroid.dbutils.persistence.sqlite.query.CursorIterable;
-
 import java.io.Serializable;
+import java.util.List;
 
-public class SQLExecutor implements CrudRepository{
+public class SQLExecutor implements SQLCommand {
     private SQLiteOpenHelper mSQLiteOpenHelper;
-    private Class mEntityClazz;
-    private Class mIdClazz;
-    private Entity mEntity;
-    public SQLExecutor(SQLiteOpenHelper helper, Class entityClazz, Class idClazz){
+
+    public SQLExecutor(SQLiteOpenHelper helper) {
         mSQLiteOpenHelper = helper;
-        mEntityClazz = entityClazz;
-        mIdClazz = idClazz;
-        init(entityClazz, idClazz);
-    }
-
-    private void init(Class entityClazz, Class idClazz){
-        mEntity = new Entity(entityClazz, idClazz);
-    }
-
-    public void createTable(){
-        mSQLiteOpenHelper.getWritableDatabase().execSQL(mEntity.createTableSql());
-    }
-
-
-    @Override
-    public void save(Object entity) {
-//        mSQLiteOpenHelper.getWritableDatabase().
-        System.out.println("xxxx");
     }
 
     @Override
-    public void save(Iterable entities) {
-
+    public void initTable(String sql) {
+        mSQLiteOpenHelper.getWritableDatabase().execSQL(sql);
     }
 
     @Override
-    public Object findOne(Serializable serializable) {
+    public void execSave(String table, ContentValues contentValues) {
+        mSQLiteOpenHelper.getWritableDatabase().insert(table, null, contentValues);
+    }
+
+    @Override
+    public void execSave(String table, List<ContentValues> contentValuesList) {
+        mSQLiteOpenHelper.getWritableDatabase().beginTransaction();
+        for (ContentValues contentValues : contentValuesList) {
+            execSave(table, contentValues);
+        }
+        mSQLiteOpenHelper.getWritableDatabase().endTransaction();
+    }
+
+    @Override
+    public Object findById(String table, String idColumn, Serializable serializable) {
+        mSQLiteOpenHelper.getReadableDatabase().query(table, null, idColumn + " = ?", new String[]{serializable.toString()}, null, null, null);
         return null;
     }
 
     @Override
-    public boolean exists(Serializable serializable) {
-        return false;
+    public int count(String table) {
+        Cursor cursor = mSQLiteOpenHelper.getReadableDatabase().query(table, null, null, null, null, null, null);
+        return cursor.getCount();
     }
 
     @Override
-    public CursorIterable findAll() {
-        return null;
-    }
-
-    @Override
-    public long count() {
-        return 0;
-    }
-
-    @Override
-    public void delete(Serializable serializable) {
-
-    }
-
-    @Override
-    public void delete(Object entity) {
-
-    }
-
-    @Override
-    public void delete(Iterable entities) {
-
-    }
-
-    @Override
-    public void deleteAll() {
-
+    public void deleteById(String table, String idColumn, Serializable serializable) {
+        mSQLiteOpenHelper.getWritableDatabase().delete(table, idColumn + " = ?", new String[]{serializable.toString()});
     }
 }
