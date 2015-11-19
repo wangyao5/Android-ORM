@@ -2,6 +2,7 @@ package com.xydroid.dbutils.persistence.sqlite;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.io.Serializable;
@@ -16,37 +17,119 @@ public class SQLExecutor implements SQLCommand {
 
     @Override
     public void initTable(String sql) {
-        mSQLiteOpenHelper.getWritableDatabase().execSQL(sql);
-    }
-
-    @Override
-    public void execSave(String table, ContentValues contentValues) {
-        mSQLiteOpenHelper.getWritableDatabase().insert(table, null, contentValues);
-    }
-
-    @Override
-    public void execSave(String table, List<ContentValues> contentValuesList) {
-        mSQLiteOpenHelper.getWritableDatabase().beginTransaction();
-        for (ContentValues contentValues : contentValuesList) {
-            execSave(table, contentValues);
+        SQLiteDatabase db = null;
+        try {
+            db = mSQLiteOpenHelper.getWritableDatabase();
+            db.execSQL(sql);
+        } catch (Exception e) {
+        } finally {
+            if (null != db) {
+                db.close();
+            }
         }
-        mSQLiteOpenHelper.getWritableDatabase().endTransaction();
     }
 
     @Override
-    public Object findById(String table, String idColumn, Serializable serializable) {
-        mSQLiteOpenHelper.getReadableDatabase().query(table, null, idColumn + " = ?", new String[]{serializable.toString()}, null, null, null);
+    public boolean execSave(String table, ContentValues contentValues) {
+        SQLiteDatabase db = null;
+        try {
+            db = mSQLiteOpenHelper.getWritableDatabase();
+            return db.insert(table, null, contentValues) >= 0;
+        } catch (Exception e) {
+            return false;
+        } finally {
+            if (null != db) {
+                db.close();
+            }
+        }
+    }
+
+    @Override
+    public boolean execSave(String table, List<ContentValues> contentValuesList) {
+        boolean result = true;
+        SQLiteDatabase db = null;
+        try {
+            db = mSQLiteOpenHelper.getWritableDatabase();
+            db.beginTransaction();
+            for (ContentValues contentValues : contentValuesList) {
+                if (db.insert(table, null, contentValues) < 0) {
+                    result = false;
+                    break;
+                }
+            }
+            if (result) {
+                db.setTransactionSuccessful();
+            }
+        } catch (Exception e) {
+            return false;
+        } finally {
+            try {
+                if (null != db) {
+                    db.endTransaction();
+                    db.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Cursor findById(String table, String idColumn, Serializable serializable) {
+        SQLiteDatabase db = null;
+        Cursor cursor = null;
+        try {
+            db = mSQLiteOpenHelper.getReadableDatabase();
+            cursor = db.query(table, null, idColumn + " = ?", new String[]{serializable.toString()}, null, null, null);
+        } catch (Exception e) {
+
+        } finally {
+            if (null != db) {
+                db.close();
+            }
+        }
+        if (null != cursor) {
+            return cursor;
+        }
+
         return null;
     }
 
     @Override
     public int count(String table) {
-        Cursor cursor = mSQLiteOpenHelper.getReadableDatabase().query(table, null, null, null, null, null, null);
-        return cursor.getCount();
+        SQLiteDatabase db = null;
+        Cursor cursor = null;
+        try {
+            db = mSQLiteOpenHelper.getReadableDatabase();
+            cursor = db.query(table, null, null, null, null, null, null);
+        } catch (Exception e) {
+
+        } finally {
+            if (null != db) {
+                db.close();
+            }
+        }
+        if (null != cursor) {
+            return cursor.getCount();
+        }
+        return 0;
     }
 
     @Override
-    public void deleteById(String table, String idColumn, Serializable serializable) {
-        mSQLiteOpenHelper.getWritableDatabase().delete(table, idColumn + " = ?", new String[]{serializable.toString()});
+    public boolean deleteById(String table, String idColumn, Serializable serializable) {
+        SQLiteDatabase db = null;
+        try {
+            db = mSQLiteOpenHelper.getWritableDatabase();
+            return db.delete(table, idColumn + " = ?", new String[]{serializable.toString()}) >= 0;
+        } catch (Exception e) {
+
+        } finally {
+            if (null != db) {
+                db.close();
+            }
+        }
+        return false;
+
     }
 }

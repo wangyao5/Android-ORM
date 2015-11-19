@@ -22,16 +22,19 @@ public class TableField {
     private boolean insertable = true;
     private boolean updatable = true;
     private String checkValue = "";
-    private Class mFieldType;
+    private Field mField;
     private ColumnConverter mFieldConverter;
 
     public TableField(Field field) {
         Annotation[] fieldAnnotations = findFieldUsedAnnotations(field);
-        mFieldType = field.getType();
-        mFieldConverter = ColumnConvertFactory.getFieldConverter(field);
+        mField = field;
+        if (ColumnConvertFactory.isSupportColumnConverter(field.getType())) {
+            mFieldConverter = ColumnConvertFactory.getFieldConverter(field);
+        }
         for (Annotation annotation : fieldAnnotations) {
             if (annotation instanceof Id) {
                 isId = true;
+                autoIncrement = true;
             }
 
             if (annotation instanceof AutoIncrement) {
@@ -112,11 +115,19 @@ public class TableField {
         return sb.toString();
     }
 
+    public ColumnConverter getFieldConverter() {
+        return mFieldConverter;
+    }
+
     public boolean isIdColumn() {
         return isId;
     }
 
     public String getColumnName() {
         return columnName;
+    }
+
+    public Field getField(){
+        return mField;
     }
 }

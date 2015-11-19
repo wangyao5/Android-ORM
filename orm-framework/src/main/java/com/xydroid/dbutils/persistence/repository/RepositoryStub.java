@@ -1,11 +1,10 @@
 package com.xydroid.dbutils.persistence.repository;
 
 import android.content.ContentValues;
-
+import android.database.Cursor;
 import com.xydroid.dbutils.persistence.sqlite.Entity;
 import com.xydroid.dbutils.persistence.sqlite.SQLExecutor;
 import com.xydroid.dbutils.persistence.sqlite.query.CursorIterable;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +29,7 @@ public class RepositoryStub implements CrudRepository {
     @Override
     public void save(Iterable entities) {
         List<ContentValues> contentValuesList = new ArrayList<>();
-        for (Object entity : entities){
+        for (Object entity : entities) {
             contentValuesList.add(mEntity.convertToCV(entity));
         }
         mExecutor.execSave(table, contentValuesList);
@@ -38,13 +37,16 @@ public class RepositoryStub implements CrudRepository {
 
     @Override
     public Object findOne(Serializable serializable) {
-        return mExecutor.findById(table, mEntity.getIdColumnName(), serializable);
+        Cursor cursor = mExecutor.findById(table, mEntity.getIdColumnName(), serializable);
+        if (null == cursor || cursor.getCount() < 1) {
+            return null;
+        }
+        return mEntity.convertToOJ(cursor);
     }
 
     @Override
     public boolean exists(Serializable serializable) {
-        if (null != findOne(serializable)) return true;
-        return false;
+        return null != findOne(serializable);
     }
 
     @Override

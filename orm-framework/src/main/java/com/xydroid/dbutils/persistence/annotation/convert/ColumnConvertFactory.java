@@ -54,6 +54,7 @@ public class ColumnConvertFactory {
         StringColumnConverter stringColumnConverter = new StringColumnConverter();
         columnConverter_map.put(String.class.getName(), stringColumnConverter);
     }
+
     private ColumnConvertFactory() {
     }
 
@@ -93,5 +94,7 @@ public class ColumnConvertFactory {
         }
         return false;
     }
+
+
 
 }
