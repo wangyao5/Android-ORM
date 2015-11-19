@@ -76,27 +76,6 @@ public class SQLExecutor implements SQLCommand {
     }
 
     @Override
-    public Cursor findById(String table, String idColumn, Serializable serializable) {
-        SQLiteDatabase db = null;
-        Cursor cursor = null;
-        try {
-            db = mSQLiteOpenHelper.getReadableDatabase();
-            cursor = db.query(table, null, idColumn + " = ?", new String[]{serializable.toString()}, null, null, null);
-        } catch (Exception e) {
-
-        } finally {
-            if (null != db) {
-                db.close();
-            }
-        }
-        if (null != cursor) {
-            return cursor;
-        }
-
-        return null;
-    }
-
-    @Override
     public int count(String table) {
         SQLiteDatabase db = null;
         Cursor cursor = null;
@@ -130,6 +109,5 @@ public class SQLExecutor implements SQLCommand {
             }
         }
         return false;
-
     }
 }

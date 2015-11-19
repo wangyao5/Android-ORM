@@ -25,12 +25,14 @@ import java.util.List;
 
 public class Entity {
     private String mTableName;
+    private Class mEntityClazz;
     private Class mIdClazz;
     private Annotation[] mEntityAnnotation;
     private List<TableField> mTableFields = new ArrayList<>();
     private String mIdColumnName;
 
     public Entity(Class entityClazz, Class idClazz) {
+        mEntityClazz = entityClazz;
         mIdClazz = idClazz;
         mEntityAnnotation = findEntityUsedAnnotation(entityClazz);
         initTableName();
@@ -106,9 +108,8 @@ public class Entity {
             }
 
             if (value == null) {
-                throw new IllegalStateException("field can not attach value");
+                throw new IllegalStateException(String.format("%s can not attach value", field.getName()));
             }
-
 
             if (converter instanceof BooleanColumnConverter) {
                 BooleanColumnConverter currentConverter = (BooleanColumnConverter) converter;
@@ -188,7 +189,86 @@ public class Entity {
         return cv;
     }
 
-    public Object convertToOJ(Cursor cursor) {
-        return null;
+    public Object convertToOJ(Cursor cursor, int index) throws IllegalArgumentException, IllegalAccessException{
+        if (null == cursor || cursor.getCount() < 0){
+            return null;
+        }
+
+        Object o = null;
+        try {
+            o = mEntityClazz.newInstance();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        if (cursor.moveToPosition(index)){
+            for (TableField tableField : mTableFields) {
+                Field field = tableField.getField();
+                field.setAccessible(true);
+                ColumnConverter converter = tableField.getFieldConverter();
+                if (converter instanceof BooleanColumnConverter) {
+                    BooleanColumnConverter currentConverter = (BooleanColumnConverter) converter;
+                    field.set(o, currentConverter.getFieldValue(cursor, tableField.getColumnName()));
+                }
+
+                if (converter instanceof ByteArrayColumnConverter) {
+                    ByteArrayColumnConverter currentConverter = (ByteArrayColumnConverter) converter;
+                    field.set(o, currentConverter.getFieldValue(cursor, tableField.getColumnName()));
+                }
+                if (converter instanceof ByteColumnConverter) {
+                    ByteColumnConverter currentConverter = (ByteColumnConverter) converter;
+                    field.set(o, currentConverter.getFieldValue(cursor, tableField.getColumnName()));
+                }
+
+                if (converter instanceof CharColumnConverter) {
+                    CharColumnConverter currentConverter = (CharColumnConverter) converter;
+                    field.set(o, currentConverter.getFieldValue(cursor, tableField.getColumnName()));
+                }
+                if (converter instanceof DateColumnConverter) {
+                    DateColumnConverter currentConverter = (DateColumnConverter) converter;
+                    field.set(o, currentConverter.getFieldValue(cursor, tableField.getColumnName()));
+                }
+
+                if (converter instanceof DoubleColumnConverter) {
+                    DoubleColumnConverter currentConverter = (DoubleColumnConverter) converter;
+                    field.set(o, currentConverter.getFieldValue(cursor, tableField.getColumnName()));
+                }
+
+                if (converter instanceof FloatColumnConverter) {
+                    FloatColumnConverter currentConverter = (FloatColumnConverter) converter;
+                    field.set(o, currentConverter.getFieldValue(cursor, tableField.getColumnName()));
+                }
+
+                if (converter instanceof IntegerColumnConverter) {
+                    IntegerColumnConverter currentConverter = (IntegerColumnConverter) converter;
+                    field.set(o, currentConverter.getFieldValue(cursor, tableField.getColumnName()));
+                }
+
+                if (converter instanceof LongColumnConverter) {
+                    LongColumnConverter currentConverter = (LongColumnConverter) converter;
+                    field.set(o, currentConverter.getFieldValue(cursor, tableField.getColumnName()));
+                }
+
+                if (converter instanceof ShortColumnConverter) {
+                    ShortColumnConverter currentConverter = (ShortColumnConverter) converter;
+                    field.set(o, currentConverter.getFieldValue(cursor, tableField.getColumnName()));
+                }
+
+                if (converter instanceof SqlDateColumnConverter) {
+                    SqlDateColumnConverter currentConverter = (SqlDateColumnConverter) converter;
+                    field.set(o, currentConverter.getFieldValue(cursor, tableField.getColumnName()));
+                }
+
+                if (converter instanceof StringColumnConverter) {
+                    StringColumnConverter currentConverter = (StringColumnConverter) converter;
+                    field.set(o, currentConverter.getFieldValue(cursor, tableField.getColumnName()));
+                }
+            }
+            return o;
+        } else {
+            return null;
+        }
     }
 }

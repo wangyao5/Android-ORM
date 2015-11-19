@@ -30,7 +30,7 @@ public class Proxy implements Repository, InvocationHandler {
         mEntity = new Entity(entityClass, idClass);
         mExec = new SQLExecutor(helper);
         mExec.initTable(mEntity.createTableSql());
-        mStub = new RepositoryStub(mExec, mEntity);
+        mStub = new RepositoryStub(mExec, helper, mEntity);
     }
 
     @Override

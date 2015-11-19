@@ -13,7 +13,7 @@ public interface CrudRepository<T, ID extends Serializable> extends Repository<T
      * @param entity
      * @return the saved entity
      */
-    void save(T entity);
+    boolean save(T entity);
 
 
     /**
@@ -22,7 +22,7 @@ public interface CrudRepository<T, ID extends Serializable> extends Repository<T
      * @param entities
      * @return
      */
-    void save(Iterable<? extends T> entities);
+    boolean save(Iterable<? extends T> entities);
 
 
     /**
@@ -67,24 +67,7 @@ public interface CrudRepository<T, ID extends Serializable> extends Repository<T
      *
      * @param id
      */
-    void delete(ID id);
-
-
-    /**
-     * Deletes a given entity.
-     *
-     * @param entity
-     */
-    void delete(T entity);
-
-
-    /**
-     * Deletes the given entities.
-     *
-     * @param entities
-     */
-    void delete(Iterable<? extends T> entities);
-
+    boolean delete(ID id);
 
     /**
      * Deletes all entities managed by the repository.
