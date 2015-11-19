@@ -1,8 +1,7 @@
 package com.xydroid.dbutils.persistence.repository;
 
-import com.xydroid.dbutils.persistence.sqlite.query.CursorIterable;
-
 import java.io.Serializable;
+import java.util.List;
 
 public interface CrudRepository<T, ID extends Serializable> extends Repository<T, ID> {
 
@@ -30,7 +29,7 @@ public interface CrudRepository<T, ID extends Serializable> extends Repository<T
      *
      * @param id
      * @return the entity with the given primary key or {@code null} if none
-     *         found
+     * found
      * @throws IllegalArgumentException if primaryKey is {@code null}
      */
     T findOne(ID id);
@@ -51,7 +50,7 @@ public interface CrudRepository<T, ID extends Serializable> extends Repository<T
      *
      * @return all entities
      */
-    CursorIterable<T> findAll();
+    List<T> findAll();
 
 
     /**
@@ -72,5 +71,7 @@ public interface CrudRepository<T, ID extends Serializable> extends Repository<T
     /**
      * Deletes all entities managed by the repository.
      */
-    void deleteAll();
+    boolean deleteAll();
+
+    boolean dropTable();
 }

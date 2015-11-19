@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
 import java.io.Serializable;
 import java.util.List;
 
@@ -82,15 +81,13 @@ public class SQLExecutor implements SQLCommand {
         try {
             db = mSQLiteOpenHelper.getReadableDatabase();
             cursor = db.query(table, null, null, null, null, null, null);
+            return cursor.getCount();
         } catch (Exception e) {
 
         } finally {
             if (null != db) {
                 db.close();
             }
-        }
-        if (null != cursor) {
-            return cursor.getCount();
         }
         return 0;
     }
@@ -109,5 +106,37 @@ public class SQLExecutor implements SQLCommand {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean deleteAll(String table) {
+        SQLiteDatabase db = null;
+        try {
+            db = mSQLiteOpenHelper.getWritableDatabase();
+            return db.delete(table, null, null) >= 0;
+        } catch (Exception e) {
+
+        } finally {
+            if (null != db) {
+                db.close();
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean dropTable(String table) {
+        SQLiteDatabase db = null;
+        try {
+            db = mSQLiteOpenHelper.getWritableDatabase();
+            db.execSQL(String.format("DROP TABLE IF EXISTS %s",table));
+            return true;
+        } catch (Exception e) {
+            return false;
+        } finally {
+            if (null != db) {
+                db.close();
+            }
+        }
     }
 }

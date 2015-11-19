@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.xydroid.dbutils.persistence.sqlite.Entity;
 import com.xydroid.dbutils.persistence.sqlite.SQLExecutor;
-import com.xydroid.dbutils.persistence.sqlite.query.CursorIterable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +46,6 @@ public class RepositoryStub implements CrudRepository {
         try {
             db = mHelper.getReadableDatabase();
             cursor = db.query(table, null, mEntity.getIdColumnName() + " = ?", new String[]{serializable.toString()}, null, null, null);
-            android.util.Log.v("yaowang","cursor");
             return mEntity.convertToOJ(cursor, 0);
         } catch (Exception e) {
 
@@ -66,8 +64,25 @@ public class RepositoryStub implements CrudRepository {
     }
 
     @Override
-    public CursorIterable findAll() {
-        return null;
+    public List findAll() {
+        List allObject = new ArrayList();
+        SQLiteDatabase db = null;
+        Cursor cursor = null;
+        try {
+            db = mHelper.getReadableDatabase();
+            cursor = db.query(table, null, null, null, null, null, null);
+            for (int i = 0; i < cursor.getCount(); i++) {
+                allObject.add(mEntity.convertToOJ(cursor, i));
+            }
+        } catch (Exception e) {
+
+        } finally {
+            if (null != db) {
+                db.close();
+            }
+        }
+
+        return allObject;
     }
 
     @Override
@@ -81,7 +96,12 @@ public class RepositoryStub implements CrudRepository {
     }
 
     @Override
-    public void deleteAll() {
+    public boolean deleteAll() {
+        return mExecutor.deleteAll(table);
+    }
 
+    @Override
+    public boolean dropTable() {
+        return mExecutor.dropTable(table);
     }
 }
