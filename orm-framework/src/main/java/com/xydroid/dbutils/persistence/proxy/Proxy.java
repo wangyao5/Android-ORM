@@ -7,6 +7,7 @@ import com.xydroid.dbutils.persistence.repository.Repository;
 import com.xydroid.dbutils.persistence.repository.RepositoryStub;
 import com.xydroid.dbutils.persistence.sqlite.Entity;
 import com.xydroid.dbutils.persistence.sqlite.SQLExecutor;
+import com.xydroid.dbutils.persistence.sqlite.query.annotation.Count;
 import com.xydroid.dbutils.persistence.sqlite.query.annotation.Param;
 import com.xydroid.dbutils.persistence.sqlite.query.annotation.Query;
 import java.lang.annotation.Annotation;
@@ -14,9 +15,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Proxy implements Repository, InvocationHandler {
     private SQLExecutor mExec;
@@ -43,13 +42,6 @@ public class Proxy implements Repository, InvocationHandler {
     @Override
     public Object invoke(Object target, Method targetMethod, Object[] params)
             throws Throwable {
-        Class methodClass = targetMethod.getDeclaringClass();
-//        mExec.save(params[0]);
-
-        Type[] gen = methodClass.getGenericInterfaces();
-        for (Type type : gen) {
-            Class clazza = type.getClass();
-        }
         if (isCrudRepositoryMethod(targetMethod)){
             return targetMethod.invoke(mStub, params);
         }
@@ -57,8 +49,6 @@ public class Proxy implements Repository, InvocationHandler {
         //default
         Annotation[] annotations = targetMethod.getAnnotations();
         if (annotations[0] instanceof Query){
-
-                //do query
                 String sql = ((Query)annotations[0]).value();
 
                 Annotation[][] parameterAnnotations = targetMethod.getParameterAnnotations();
@@ -73,9 +63,11 @@ public class Proxy implements Repository, InvocationHandler {
                 }
                 if (sql.toUpperCase().startsWith("SELECT")){
                     if (targetMethod.getReturnType().getClass().isInstance(List.class)) {
+                        //do query
                         return mDefaultRepository.execQuery(sql);
                     }else {
                         //no query
+                        throw new IllegalArgumentException("SELECT must result List Object");
                     }
                 }
                 if (sql.toUpperCase().startsWith("UPDATE")){
@@ -86,8 +78,30 @@ public class Proxy implements Repository, InvocationHandler {
                 }
         }
 
+        if (annotations[0] instanceof Count){
+            String sql = ((Count)annotations[0]).value();
 
-        return targetMethod.getReturnType().newInstance();
+            Annotation[][] parameterAnnotations = targetMethod.getParameterAnnotations();
+            int paramSize = params.length;
+            for (int i =0 ; i < paramSize; i ++){
+                String key = String.format(":%s", ((Param) parameterAnnotations[i][0]).value());
+                if (params[i] instanceof String){
+                    sql = sql.replace(key, String.format("'%s'", params[i].toString()));
+                }else {
+                    sql = sql.replace(key, params[i].toString());
+                }
+            }
+            if (sql.toUpperCase().startsWith("SELECT")){
+                if (targetMethod.getReturnType().getClass().isInstance(Number.class)) {
+                    //do query
+                    return mDefaultRepository.execCount(sql);
+                }else {
+                    //no query
+                    throw new IllegalArgumentException("SELECT must result Number Object");
+                }
+            }
+        }
+        return new Object();
     }
 
     private boolean isCrudRepositoryMethod(Method targetMethod){

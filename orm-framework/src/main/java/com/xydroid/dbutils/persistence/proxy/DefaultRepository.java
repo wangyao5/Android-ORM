@@ -52,4 +52,22 @@ public class DefaultRepository {
             }
         }
     }
+
+    int execCount(String sql) {
+        SQLiteDatabase db = null;
+        Cursor cursor = null;
+        try {
+            db = mHelper.getReadableDatabase();
+            cursor = db.rawQuery(sql, null);
+            return cursor.getCount();
+        } catch (Exception e) {
+
+        } finally {
+            if (null != db) {
+                db.close();
+            }
+        }
+
+        return 0;
+    }
 }
